@@ -1,9 +1,15 @@
 # Astro starter theme to build a headless ecommerce website with Shopify
 
 The theme is built with Svelte but you can use any framework you like (React, Vue, Solid etc.) thanks to Astro.
-Tailwind UI free components are used for the design.
+Tailwind UI free components are used for the design. All credit should go to ThomasKn as he built the original theme. All I did was update it to the latest version of Astro and Tailwind UI and added a few features. The original repo can be found here https://github.com/thomasKn/astro-shopify
 
 ![astro_shopify_preview](https://user-images.githubusercontent.com/10447155/214480671-8380f410-cbfb-4f53-a6bb-5c744073e2f2.jpg)
+
+## ⚙️ 2024 Changes 
+
+1. Removed the 250 products limit by using pagination. There is an optional "limit" prop if you want to reduce the number of products per page.
+2. Updated all packages and dependencies to the latest version. 
+3. Added a "loading" state to the cart button when adding a product to the cart.
 
 ## 🧑‍🚀 Where to start
 
