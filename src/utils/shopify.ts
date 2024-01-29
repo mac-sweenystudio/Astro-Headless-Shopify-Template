@@ -1,15 +1,16 @@
-import { z } from "zod";
-import { CartResult, ProductResult } from "./schemas";
-import { config } from "./config";
 import {
-  ProductsQuery,
-  ProductByHandleQuery,
-  CreateCartMutation,
   AddCartLinesMutation,
+  CreateCartMutation,
   GetCartQuery,
-  RemoveCartLinesMutation,
+  ProductByHandleQuery,
   ProductRecommendationsQuery,
+  ProductsQuery,
+  RemoveCartLinesMutation,
 } from "./graphql";
+import { CartResult, ProductResult } from "./schemas";
+
+import { config } from "./config";
+import { z } from "zod";
 
 // Make a request to Shopify's GraphQL API  and return the data object from the response body as JSON data.
 const makeShopifyRequest = async (
@@ -67,24 +68,35 @@ const makeShopifyRequest = async (
 };
 
 // Get all products or a limited number of products (default: 10)
+// Get all products or a limited number of products
 export const getProducts = async (options: {
   limit?: number;
   buyerIP: string;
 }) => {
-  const { limit = 10, buyerIP } = options;
+  const { limit, buyerIP } = options;
 
-  const data = await makeShopifyRequest(
-    ProductsQuery,
-    { first: limit },
-    buyerIP
-  );
-  const { products } = data;
+  let productsList: any[] = [];
+  let hasNextPage = true;
+  let after: string | undefined;
 
-  if (!products) {
-    throw new Error("No products found");
+  while (hasNextPage && (limit === undefined || productsList.length < limit)) {
+    const first = limit !== undefined ? Math.min(limit - productsList.length, 250) : 250;
+    const data = await makeShopifyRequest(
+      ProductsQuery,
+      { first, after },
+      buyerIP
+    );
+    const { products } = data;
+
+    if (!products) {
+      throw new Error("No products found");
+    }
+
+    productsList = [...productsList, ...products.edges.map((edge: any) => edge.node)];
+    hasNextPage = products.pageInfo.hasNextPage;
+    after = products.edges[products.edges.length - 1].cursor;
   }
 
-  const productsList = products.edges.map((edge: any) => edge.node);
   const ProductsResult = z.array(ProductResult);
   const parsedProducts = ProductsResult.parse(productsList);
 
